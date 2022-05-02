@@ -7,9 +7,7 @@ create table album(
     albumID int auto_increment primary key,
     albumName varchar(50) not null,
     artistID int not null,
-    released date not null,
     foreign key(artistID) references artist(id),
-    foreign key(released) references song(releaseDate),
     unique(albumName, artistID)
 );
 
@@ -41,14 +39,6 @@ create table user(
     username varchar(50) not null unique
 );
 
-create table playlistSongs(
-    playlistID int,
-    songID int,
-    foreign key(playlistID) references playlist(playlistID),
-    foreign key(songID) references song(songID),
-    primary key(playlistID, songID)
-);
-
 create table playlist(
     playlistID int auto_increment primary key,
     title varchar(50) not null,
@@ -56,6 +46,14 @@ create table playlist(
     userID int not null,
     foreign key(userID) references user(userID),
     unique(title, userID)
+);
+
+create table playlistSongs(
+    playlistID int,
+    songID int,
+    foreign key(playlistID) references playlist(playlistID),
+    foreign key(songID) references song(songID),
+    primary key(playlistID, songID)
 );
 
 create table AlbumRating(
