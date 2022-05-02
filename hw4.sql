@@ -94,3 +94,215 @@ create table PlaylistRating(
     created date,
     primary key(playlistID, userID, created)
 );
+
+-- problem 1
+select
+    gl.name,
+    count(*)
+from
+    songGenres sg,
+    genreList gl
+where
+    gl.genreID = sg.genreID
+group by
+    sg.genreID
+order by
+    count(*) DESC
+limit
+    3;
+
+-- problem 2
+select
+    distinct a.name artist_name
+from
+    song s,
+    artist a
+where
+    s.artistID = a.id
+    and a.id in (
+        select
+            distinct a1.artistID
+        from
+            album a1
+    )
+    and a.id in (
+        select
+            s.artistID
+        from
+            song s
+        where
+            s.albumID is null
+    );
+
+-- problem 3
+select
+    a.albumName album_name,
+    avg(ar.rating) average_user_rating
+from
+    AlbumRating ar,
+    album a
+where
+    ar.created >= "1990-01-01"
+    and ar.created <= "1999-12-31"
+    and a.albumID = ar.albumID
+group by
+    ar.albumID
+order by
+    avg(ar.rating) DESC
+limit
+    10;
+
+-- problem 4
+select
+    gl.name genre_name,
+    count(*) number_of_song_ratings
+from
+    SongRating sr,
+    songGenres sg,
+    genreList gl
+where
+    sr.created >= "1991-01-01"
+    and sr.created <= "1995-12-31"
+    and sr.songID = sg.songID
+    and sg.genreID = gl.genreID
+group by
+    gl.name
+order by
+    count(*) DESC,
+    gl.name ASC
+limit
+    3;
+
+--problem 5
+select
+    u.username username,
+    p.title playlist_title,
+    avgPR.avgPsRating average_song_rating
+from
+    (
+        select
+            ps.playlistID,
+            avg(avgRating) avgPsRating
+        from
+            playlistSongs ps
+            left join (
+                select
+                    sr.songID,
+                    avg(sr.rating) avgRating
+                from
+                    SongRating sr
+                group by
+                    sr.songID
+            ) temp1 on temp1.songID = ps.songID
+        group by
+            ps.playlistID
+    ) avgPR,
+    user u,
+    playlist p
+where
+    u.userID = p.userID
+    and p.playlistID = avgPR.playlistID
+    and avgPR.avgPsRating >= 4;
+
+--problem 6
+select
+    u.username username,
+    sum(ratingCountByUser.rcount) number_of_ratings
+from
+    (
+        select
+            sr.userID,
+            count(*) rcount
+        from
+            SongRating sr
+        group by
+            sr.userID
+        union
+        all
+        select
+            ar.userID,
+            count(*) rcount
+        from
+            AlbumRating ar
+        group by
+            ar.userID
+    ) ratingCountByUser,
+    user u
+where
+    u.userID = ratingCountByUser.userID
+group by
+    ratingCountByUser.userID
+order by
+    sum(ratingCountByUser.rcount) DESC
+limit
+    5;
+
+-- problem 7
+select
+    a.name artist_name,
+    count(*) number_of_songs
+from
+    song s,
+    artist a
+where
+    s.releaseDate >= "1990-01-01"
+    and s.releaseDate <= "2010-12-31"
+    and a.id = s.artistID
+group by
+    s.artistID
+order by
+    count(*) DESC
+limit
+    10;
+
+-- problem 8
+select
+    s.title song_title,
+    count(*) number_of_playlists
+from
+    playlistSongs ps,
+    song s
+where
+    ps.songID = s.songID
+group by
+    ps.songID
+order by
+    count(*) DESC,
+    s.title ASC
+limit
+    10;
+
+--problem 9
+select
+    s.title song_title,
+    a.name artist_name,
+    count(*) number_of_ratings
+from
+    SongRating sr,
+    song s,
+    artist a
+where
+    sr.songID = s.songID
+    and a.id = s.artistID
+    and s.albumID is null
+group by
+    sr.songID
+order by
+    count(*) DESC
+limit
+    20;
+
+--problem 10
+select
+    a.name artist_title
+from
+    artist a
+where
+    a.id not in (
+        select
+            distinct s.artistID
+        from
+            song s
+        where
+            s.releaseDate >= "1994-01-01"
+    );
