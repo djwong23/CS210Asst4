@@ -6,8 +6,10 @@ create table artist(
 create table album(
     albumID int auto_increment primary key,
     albumName varchar(50) not null,
-    artistID int references artist not null,
-    released date references song not null,
+    artistID int not null,
+    released date not null,
+    foreign key(artistID) references artist(id),
+    foreign key(released) references song(releaseDate),
     unique(albumName, artistID)
 );
 
@@ -18,15 +20,18 @@ create table genreList(
 
 create table songGenres(
     songID int not null,
-    genreID tinyint references genreList not null,
+    genreID tinyint not null,
+    foreign key(genreID) references genreList(genreID),
     primary key(songID, genreID)
 );
 
 create table song(
     songID int auto_increment primary key,
     title varchar(50) not null,
-    artistID int references artist not null,
-    albumID int references album,
+    artistID int not null,
+    albumID int,
+    foreign key(artistID) references artist(id),
+    foreign key(albumID) references album(albumID),
     releaseDate date not null,
     unique(title, artistID)
 );
@@ -37,8 +42,10 @@ create table user(
 );
 
 create table playlistSongs(
-    playlistID int references playlist,
-    songID int references song,
+    playlistID int,
+    songID int,
+    foreign key(playlistID) references playlist(playlistID),
+    foreign key(songID) references song(songID),
     primary key(playlistID, songID)
 );
 
@@ -46,13 +53,16 @@ create table playlist(
     playlistID int auto_increment primary key,
     title varchar(50) not null,
     created datetime not null,
-    userID int references user not null,
+    userID int not null,
+    foreign key(userID) references user(userID),
     unique(title, userID)
 );
 
 create table AlbumRating(
-    albumID int references album not null,
-    userID int references user not null,
+    userID int not null,
+    albumID int not null,
+    foreign key(userID) references user(userID),
+    foreign key(albumID) references album(albumID),
     rating tinyInt check (
         rating >= 1
         and rating <= 5
@@ -62,23 +72,27 @@ create table AlbumRating(
 );
 
 create table SongRating(
-    songID int references song not null,
-    userID int references user not null,
+    userID int not null,
+    songID int not null,
+    foreign key(songID) references song(songID),
+    foreign key(userID) references user(userID),
     rating tinyInt check (
         rating >= 1
         and rating <= 5
     ),
     created date,
-    primary key(albumID, userID, created)
+    primary key(songID, userID, created)
 );
 
 create table PlaylistRating(
-    playlistID int references playlist not null,
-    userID int references user not null,
+    playlistID int not null,
+    userID int not null,
+    foreign key(playlistID) references playlist(playlistID),
+    foreign key(userID) references user(userID),
     rating tinyInt check (
         rating >= 1
         and rating <= 5
     ),
     created date,
-    primary key(albumID, userID, created)
+    primary key(playlistID, userID, created)
 );
